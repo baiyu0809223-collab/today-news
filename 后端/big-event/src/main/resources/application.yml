@@ -1,0 +1,26 @@
+#数据源配置
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/big_event?characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: root
+    password: 5201314
+
+#redis配置
+  data:
+    redis:
+      host: localhost
+      port: 6379
+#tomcat端口
+server:
+  port: 8080
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true #开启驼峰命名和下划线命名的自动转换
+
+#ai配置
+ai:
+  api-key: sk-386844e3df28445f967bd81fc8c78049
+  api-url: https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation
+

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pxxy.mapper.ArticleMapper">
+
+    <!--动态sql-->
+
+    <select id="listbykey" resultType="com.pxxy.pojo.Article">
+        SELECT *
+        FROM article
+        <where>
+            <if test="categoryId != null">
+                category_id = #{categoryId}
+            </if>
+
+            <if test="state != null">
+                AND state = #{state}
+            </if>
+
+            <if test="title != null and title != ''">
+                AND (
+                title   LIKE CONCAT('%', #{title}, '%')
+                OR content LIKE CONCAT('%', #{title}, '%')
+                )
+            </if>
+        </where>
+    </select>
+
+    <select id="list" resultType="com.pxxy.pojo.Article">
+        SELECT *
+        FROM article
+        <where>
+            <if test="categoryId != null">
+                category_id = #{categoryId}
+            </if>
+
+            <if test="state != null">
+                AND state = #{state}
+            </if>
+            AND create_user = #{id}
+        </where>
+    </select>
+
+    <select id="alllist" resultType="com.pxxy.pojo.Article">
+        SELECT
+        a.*,
+        u.username AS createUsername  <!-- 返回user表中的username -->
+        FROM
+        article a
+        LEFT JOIN
+        user u ON a.create_user = u.id  <!-- 联表条件 -->
+        <where>
+            AND a.state !='草稿'
+            <if test="categoryId != null">
+                a.category_id = #{categoryId}
+            </if>
+            <if test="state != null">
+                AND a.state = #{state}
+            </if>
+            <if test="createUser != null">
+                and a.create_user=#{createUser}
+            </if>
+        </where>
+    </select>
+    <select id="getAll" resultType="com.pxxy.pojo.Article">
+        select *from article
+        <where>
+            state='已发布'
+            <if test="id!=null">
+                and category_id=#{id}
+            </if>
+            <if test="keyword!=null">
+                and title like concat('%', #{keyword}, '%') or content like concat('%', #{keyword}, '%')
+            </if>
+
+        </where>
+        order by update_time desc
+    </select>
+</mapper>

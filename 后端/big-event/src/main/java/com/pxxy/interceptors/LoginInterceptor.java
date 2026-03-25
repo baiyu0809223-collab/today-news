@@ -1,0 +1,55 @@
+package com.pxxy.interceptors;
+
+import com.pxxy.pojo.Result;
+import com.pxxy.utils.JwtUtil;
+import com.pxxy.utils.ThreadLocalUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.HandlerInterceptor;
+
+import java.io.StringReader;
+import java.util.Map;
+
+@Component
+public class LoginInterceptor implements HandlerInterceptor {
+
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        //令牌验证
+        String token = request.getHeader("Authorization");
+        //验证token
+        try {
+            //从redis中获取相同的token
+            ValueOperations<String, String> operations = stringRedisTemplate.opsForValue();
+            String redistoken = operations.get(token);
+            if (redistoken==null){
+                //token已经失效了
+                throw new RuntimeException();
+            }
+            Map<String, Object> claims = JwtUtil.parseToken(token);
+            ThreadLocalUtil.set(claims);
+            return true;
+        } catch (Exception e) {
+            //http响应状态码为401
+            System.out.println("请求为违法！！！");
+
+            response.setStatus(402);
+            //不放行
+            return false;
+        }
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        //清空ThreadLocalUtil,防止内存泄露
+        ThreadLocalUtil.remove();
+
+    }
+}
